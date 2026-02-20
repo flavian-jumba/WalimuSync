@@ -62,7 +62,8 @@ it('logs in a known user with valid firebase token and issues sanctum token', fu
         ->assertOk()
         ->assertJsonPath('message', 'Login successful')
         ->assertJsonPath('user.id', $user->id)
-        ->assertJsonPath('user.email', 'teacher@example.com');
+        ->assertJsonPath('user.email', 'teacher@example.com')
+        ->assertJsonMissing(['firebase_uid']);
 
     expect($response->json('token'))->toBeString()->not->toBe('');
 

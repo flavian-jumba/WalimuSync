@@ -23,8 +23,9 @@ beforeEach(function (): void {
 it('returns authenticated user from /api/v1/user', function (): void {
     $this->getJson('/api/v1/user')
         ->assertOk()
-        ->assertJsonPath('id', $this->teacher->id)
-        ->assertJsonPath('email', $this->teacher->email);
+        ->assertJsonPath('data.id', $this->teacher->id)
+        ->assertJsonPath('data.email', $this->teacher->email)
+        ->assertJsonStructure(['data' => ['id', 'name', 'email', 'avatar_url', 'created_at']]);
 });
 
 it('returns 401 for unauthenticated requests', function (): void {
@@ -32,6 +33,22 @@ it('returns 401 for unauthenticated requests', function (): void {
         ->getJson('/api/v1/user')
         ->assertUnauthorized();
 })->skip('Acting as overrides headers');
+
+it('can log out and revoke token', function (): void {
+    // Create a real Sanctum token to test actual token revocation
+    $user = User::factory()->create();
+    $token = $user->createToken('test-token');
+
+    // Reset auth guards so the real Bearer token is used instead of actingAs TransientToken
+    $this->app['auth']->forgetGuards();
+
+    $this->withHeader('Authorization', 'Bearer '.$token->plainTextToken)
+        ->postJson('/api/v1/logout')
+        ->assertOk()
+        ->assertJsonPath('message', 'Logged out successfully.');
+
+    expect($user->tokens()->count())->toBe(0);
+});
 
 // ─── Device Tokens ──────────────────────────────────────────────────
 
@@ -102,7 +119,7 @@ it('lists timetable slots', function (): void {
     $this->getJson('/api/v1/timetable')
         ->assertOk()
         ->assertJsonStructure(['data']);
-})->skip('TimetableSlotController uses MySQL FIELD() — incompatible with SQLite test DB');
+});
 
 // ─── Duty Assignments ───────────────────────────────────────────────
 
@@ -166,7 +183,8 @@ it('lists announcements for teacher', function (): void {
 // ─── Students ───────────────────────────────────────────────────────
 
 it('lists students', function (): void {
-    Student::factory()->count(2)->create();
+    $class = SchoolClass::factory()->create();
+    Student::factory()->count(2)->create(['school_class_id' => $class->id]);
 
     $this->getJson('/api/v1/students')
         ->assertOk()

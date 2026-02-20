@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Resources\Api\V1\UserResource;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -72,7 +73,18 @@ class AuthController extends Controller
         return response()->json([
             'message' => $user->wasRecentlyCreated ? 'Account created' : 'Login successful',
             'token' => $token,
-            'user' => $user,
+            'user' => new UserResource($user),
         ]);
+    }
+
+    public function logout(Request $request): JsonResponse
+    {
+        $token = $request->user()->currentAccessToken();
+
+        if ($token instanceof \Laravel\Sanctum\PersonalAccessToken) {
+            $token->delete();
+        }
+
+        return response()->json(['message' => 'Logged out successfully.']);
     }
 }

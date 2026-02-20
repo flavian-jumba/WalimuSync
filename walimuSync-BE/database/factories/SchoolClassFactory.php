@@ -15,7 +15,7 @@ class SchoolClassFactory extends Factory
         return [
             'name' => 'Form '.fake()->numberBetween(1, 4),
             'stream' => fake()->randomElement(['East', 'West', 'North', 'South']),
-            'academic_year' => fake()->year(),
+            'academic_year' => (string) fake()->numberBetween(2000, 2099),
         ];
     }
 }

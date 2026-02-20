@@ -19,12 +19,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // Firebase Authentication Route
-Route::post('firebase-login', [AuthController::class, 'firebaseLogin']);
+Route::post('firebase-login', [AuthController::class, 'firebaseLogin'])
+    ->middleware('throttle:10,1');
 
 // V1 API Routes
 Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     // Authenticated user
-    Route::get('/user', fn (Request $request) => $request->user());
+    Route::get('/user', fn (Request $request) => new \App\Http\Resources\Api\V1\UserResource($request->user()));
+
+    // Logout (revoke current token)
+    Route::post('/logout', [AuthController::class, 'logout']);
 
     // Device tokens (FCM)
     Route::post('/device-tokens', [DeviceTokenController::class, 'store']);
