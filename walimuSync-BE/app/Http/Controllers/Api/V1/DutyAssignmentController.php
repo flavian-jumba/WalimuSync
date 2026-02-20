@@ -7,6 +7,7 @@ use App\Http\Requests\Api\V1\StoreDutyAssignmentRequest;
 use App\Http\Requests\Api\V1\UpdateDutyAssignmentRequest;
 use App\Http\Resources\Api\V1\DutyAssignmentResource;
 use App\Models\DutyAssignment;
+use App\Notifications\DutyAssigned;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -35,6 +36,8 @@ class DutyAssignmentController extends Controller
     {
         $duty = DutyAssignment::create($request->validated());
         $duty->load('teacher');
+
+        $duty->teacher->notify(new DutyAssigned($duty));
 
         return response()->json([
             'message' => 'Duty assignment created.',

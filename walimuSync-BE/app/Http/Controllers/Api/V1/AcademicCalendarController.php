@@ -7,9 +7,12 @@ use App\Http\Requests\Api\V1\StoreAcademicCalendarRequest;
 use App\Http\Requests\Api\V1\UpdateAcademicCalendarRequest;
 use App\Http\Resources\Api\V1\AcademicCalendarResource;
 use App\Models\AcademicCalendar;
+use App\Models\User;
+use App\Notifications\CalendarEventCreated;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Notification;
 
 class AcademicCalendarController extends Controller
 {
@@ -33,6 +36,12 @@ class AcademicCalendarController extends Controller
     public function store(StoreAcademicCalendarRequest $request): JsonResponse
     {
         $event = AcademicCalendar::create($request->validated());
+
+        // Notify all teachers with devices about meetings and events
+        if (in_array($event->type, ['meeting', 'event'])) {
+            $teachers = User::whereHas('deviceTokens')->get();
+            Notification::send($teachers, new CalendarEventCreated($event));
+        }
 
         return response()->json([
             'message' => 'Calendar event created.',

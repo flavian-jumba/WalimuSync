@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\StoreSubstitutionRequest;
 use App\Http\Resources\Api\V1\SubstitutionResource;
 use App\Models\Substitution;
+use App\Notifications\SubstitutionAssigned;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -35,6 +36,8 @@ class SubstitutionController extends Controller
     {
         $substitution = Substitution::create($request->validated());
         $substitution->load(['timetableSlot.schoolClass', 'timetableSlot.subject', 'substituteTeacher']);
+
+        $substitution->substituteTeacher->notify(new SubstitutionAssigned($substitution));
 
         return response()->json([
             'message' => 'Cover lesson created.',

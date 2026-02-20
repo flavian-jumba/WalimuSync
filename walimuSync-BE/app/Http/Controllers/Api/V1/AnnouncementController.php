@@ -7,9 +7,12 @@ use App\Http\Requests\Api\V1\StoreAnnouncementRequest;
 use App\Http\Requests\Api\V1\UpdateAnnouncementRequest;
 use App\Http\Resources\Api\V1\AnnouncementResource;
 use App\Models\Announcement;
+use App\Models\User;
+use App\Notifications\NewAnnouncement;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Notification;
 
 class AnnouncementController extends Controller
 {
@@ -43,6 +46,10 @@ class AnnouncementController extends Controller
         ]);
 
         $announcement->load(['schoolClass', 'author']);
+
+        // Notify all teachers with registered devices
+        $teachers = User::whereHas('deviceTokens')->get();
+        Notification::send($teachers, new NewAnnouncement($announcement));
 
         return response()->json([
             'message' => 'Announcement created.',
