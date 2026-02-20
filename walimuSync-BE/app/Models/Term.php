@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Term extends Model
 {
+    /** @use HasFactory<\Database\Factories\TermFactory> */
+    use HasFactory;
+
     protected $fillable = [
         'name',
         'start_date',

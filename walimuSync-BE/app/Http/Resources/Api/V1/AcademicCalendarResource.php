@@ -16,9 +16,15 @@ class AcademicCalendarResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'title' => $this->title,
             'date' => $this->date?->toDateString(),
+            'end_date' => $this->end_date?->toDateString(),
             'type' => $this->type,
+            'is_all_day' => $this->is_all_day,
+            'start_time' => $this->start_time?->format('H:i'),
+            'end_time' => $this->end_time?->format('H:i'),
             'description' => $this->description,
+            'suppresses_notifications' => $this->suppresses_notifications,
         ];
     }
 }
