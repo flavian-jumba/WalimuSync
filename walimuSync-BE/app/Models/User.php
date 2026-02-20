@@ -74,6 +74,26 @@ class User extends Authenticatable
         return $this->hasMany(DeviceToken::class);
     }
 
+    public function assignedCollections(): HasMany
+    {
+        return $this->hasMany(FeeCollection::class, 'assigned_teacher_id');
+    }
+
+    public function collectedPayments(): HasMany
+    {
+        return $this->hasMany(FeePayment::class, 'collected_by');
+    }
+
+    public function announcements(): HasMany
+    {
+        return $this->hasMany(Announcement::class, 'posted_by');
+    }
+
+    public function recordedResults(): HasMany
+    {
+        return $this->hasMany(ExamResult::class, 'recorded_by');
+    }
+
     public function routeNotificationForFcm(): array
     {
         return $this->deviceTokens()

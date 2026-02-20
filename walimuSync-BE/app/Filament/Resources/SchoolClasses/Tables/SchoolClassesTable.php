@@ -6,6 +6,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class SchoolClassesTable
@@ -25,13 +26,26 @@ class SchoolClassesTable
                 TextColumn::make('academic_year')
                     ->label('Year')
                     ->sortable(),
+                TextColumn::make('classTeacher.name')
+                    ->label('Class Teacher')
+                    ->placeholder('Not Assigned')
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('students_count')
+                    ->label('Students')
+                    ->counts('students')
+                    ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('teacher_id')
+                    ->relationship('classTeacher', 'name')
+                    ->label('Class Teacher')
+                    ->searchable()
+                    ->preload(),
             ])
             ->recordActions([
                 EditAction::make(),

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\SchoolClasses\Schemas;
 
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
@@ -22,6 +23,12 @@ class SchoolClassForm
                     ->label('Academic Year')
                     ->placeholder('e.g. 2026')
                     ->required(),
+                Select::make('teacher_id')
+                    ->relationship('classTeacher', 'name')
+                    ->label('Class Teacher')
+                    ->searchable()
+                    ->preload()
+                    ->helperText('Teacher responsible for this class'),
             ]);
     }
 }
